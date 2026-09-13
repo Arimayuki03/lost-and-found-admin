@@ -1,0 +1,495 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  display: block;
+  min-width: auto;
+  min-height: auto;
+
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.card {
+  padding: 2em;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  text-align: left;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* 管理界面公共样式 */
+
+/* 页面容器 */
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 顶部区域 */
+.page-header {
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title-section {
+  position: relative;
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin: 0;
+  padding: 0;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.title-decoration {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #60a5fa 100%);
+  border-radius: 2px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* 筛选区域 */
+.filter-section {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+}
+
+.filter-label {
+  margin-right: 8px;
+  color: #606266;
+  font-weight: 500;
+}
+
+.filter-item {
+  width: 120px;
+  margin-right: 10px;
+}
+
+.search-group {
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 250px;
+  margin-right: 10px;
+}
+
+/* 高级筛选 */
+.filter-collapse {
+  margin-top: 15px;
+}
+
+.collapse-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #409EFF;
+  font-weight: 500;
+}
+
+.advanced-filter-container {
+  padding: 15px 0;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.filter-item-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-select, .filter-input {
+  width: 100%;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* 中间内容区域 */
+.scrollable-content {
+  flex: 1;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 60px;
+  position: relative;
+}
+
+.main-content {
+  flex: 1;
+  overflow: hidden !important;
+  position: relative;
+}
+
+/* 表格容器样式 */
+.table-container {
+  height: auto !important;
+  position: relative;
+}
+
+/* 表格样式 */
+.el-table {
+  --el-table-border-color: #e5e7eb;
+  --el-table-header-bg-color: #f0f7ff;
+  --el-table-row-hover-bg-color: #f9fafb;
+  height: 500px !important;
+}
+
+/* 表格行样式 */
+.el-table .even-row {
+  background-color: #f9fafb;
+}
+
+.el-table .odd-row {
+  background-color: #ffffff;
+}
+
+.el-table .warning-row {
+  background-color: #fff7ed;
+}
+
+/* 底部分页区域 */
+.pagination-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background-color: #ffffff;
+  border-top: 1px solid #e4e7ed;
+  padding: 10px 20px;
+  margin-left: var(--sidebar-width, 200px);
+  height: 60px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.total-text {
+  color: #606266;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #f5f7fa;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+}
+
+/* 美化分页组件 */
+.el-pagination {
+  --el-pagination-button-color: #606266;
+  --el-pagination-button-bg-color: #f4f4f5;
+  --el-pagination-button-size: 32px;
+  --el-pagination-button-margin: 0 5px;
+  --el-pagination-button-border-radius: 6px;
+  --el-pagination-hover-color: #1e40af;
+  --el-pagination-font-size: 14px;
+}
+
+.el-pagination .el-pager li {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.el-pagination .el-pager li.is-active {
+  background-color: #1e40af;
+  color: white;
+  font-weight: 600;
+}
+
+.el-pagination .btn-prev,
+.el-pagination .btn-next {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.page-size-select {
+  width: 110px;
+  margin-right: 15px;
+}
+
+.go-to-page {
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+  color: #606266;
+  font-size: 14px;
+  background-color: #f5f7fa;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.go-page-input {
+  width: 50px;
+  margin: 0 8px;
+}
+
+/* 按钮样式 */
+.el-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.active-button {
+  font-weight: 600 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.el-button--primary.active-button {
+  background-color: #1e40af;
+  border-color: #1e40af;
+  color: white;
+}
+
+.el-button--warning.active-button {
+  background-color: #d97706;
+  border-color: #d97706;
+  color: white;
+}
+
+/* 操作按钮 */
+.operation-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+}
+
+.operation-button {
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  font-size: 12px !important;
+  height: 28px !important;
+  min-height: unset !important;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 1400px) {
+  .operation-buttons {
+    flex-direction: column;
+  }
+  
+  .filter-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .pagination-container {
+    margin-left: 64px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .header-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+  
+  .filter-group, .search-group {
+    width: 100%;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pagination-container {
+    margin-left: 0;
+    padding: 10px;
+    flex-direction: column;
+    height: auto;
+    gap: 10px;
+  }
+  
+  .pagination-controls {
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+}
+
+/* 添加美观的滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+
+/* 保留固定右侧操作列的样式 */
+:deep(.el-table__fixed-right) {
+  position: fixed !important;
+  right: 0 !important;
+  z-index: 9 !important;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+:deep(.el-table__fixed-right .el-table__header-wrapper) {
+  position: fixed !important;
+  top: 0 !important;
+  z-index: 11 !important;
+}
