@@ -159,6 +159,8 @@
 
 ## 八、遗留事项与建议
 
+> 本章事项的执行优先级与整体规划已整理至 [ROADMAP.md](ROADMAP.md)，以下为原始记录。
+
 1. **LostItems/FoundItems 双文件合并**：两文件约 880 行 ×2 仍是复制粘贴关系（本次已将行为对齐并清理死代码）。建议后续抽取共享的"物品管理"组件/composable，可消除约一半代码；筛选模式下顶部搜索框不生效也是两文件共有的已知限制——后端 `/sift` 接口只支持 `name/location` 等独立字段，不支持通用 `query`，需后端配合才能接通。
 2. **Element Plus 按需加载**：本次分包后 `element-plus` chunk 仍约 995KB（全量引入 `app.use(ElementPlus)` + 全量图标注册）。如需进一步压缩，引入 `unplugin-vue-components` 按需加载。
 3. **token 持久化于 localStorage**：存在 XSS 窃取风险（既有记录），如有安全要求可评估 HttpOnly Cookie 方案（需后端配合）。
