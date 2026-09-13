@@ -85,6 +85,7 @@
           <el-upload
             class="avatar-uploader"
             action="/api/common/images/upload"
+            :headers="uploadHeaders"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
@@ -134,10 +135,14 @@
 <script setup>
 import { ref, reactive, computed, watch } from 'vue';
 import { useAdminStore } from '@/store/modules/admin';
+import { useUserStore } from '@/store/modules/user';
 import { ElMessage } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
 
 const adminStore = useAdminStore();
+const userStore = useUserStore();
+// 上传接口已要求登录，el-upload 直传需要手动携带 token
+const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }));
 const currentPage = ref(1);
 const pageSize = ref(10);
 const sortOption = ref('id'); // 默认按ID排序

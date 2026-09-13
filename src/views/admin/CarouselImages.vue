@@ -135,7 +135,7 @@
         </el-form-item>
 
         <el-form-item label="图片上传">
-          <el-upload class="upload-demo" action="/api/common/images/upload" :show-file-list="false"
+          <el-upload class="upload-demo" action="/api/common/images/upload" :headers="uploadHeaders" :show-file-list="false"
             :on-success="handleUploadSuccess" :on-error="handleUploadError" :before-upload="beforeUpload">
             <el-button type="primary">点击上传</el-button>
             <template #tip>
@@ -176,6 +176,11 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { getCarouselImages, addCarouselImage, updateCarouselImage, deleteCarouselImage } from '@/api/admin';
 import { Search } from '@element-plus/icons-vue';
 import { formatDate } from '@/utils/format';
+import { useUserStore } from '@/store/modules/user';
+
+const userStore = useUserStore();
+// 上传接口已要求登录，el-upload 直传需要手动携带 token
+const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }));
 
 // 数据状态
 const carouselImages = ref([]);

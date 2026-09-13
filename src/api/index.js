@@ -16,6 +16,10 @@ let requestsQueue = [];
 // 不能再触发刷新流程，否则「登录失败 -> 刷新失败 -> 跳登录页」会覆盖掉真实的错误提示
 const isAuthUrl = (url = '') => /\/(login|refresh)$/.test(url);
 
+// JWT 失效的状态码：401 为过期/缺失，422 为 token 格式损坏
+// （flask-jwt-extended 对无法解析的 token 返回 422）
+const isJwtError = (status) => status === 401 || status === 422;
+
 // 请求拦截器
 service.interceptors.request.use(
   config => {
@@ -38,8 +42,8 @@ service.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    // 检查是否为401错误且不是认证接口本身
-    if (error.response && error.response.status === 401 &&
+    // 检查是否为 JWT 失效错误且不是认证接口本身
+    if (error.response && isJwtError(error.response.status) &&
         originalRequest && !originalRequest._retry && !isAuthUrl(originalRequest.url)) {
 
       if (!isRefreshing) {
