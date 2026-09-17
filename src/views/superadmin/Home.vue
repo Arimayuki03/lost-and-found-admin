@@ -1,44 +1,42 @@
 <template>
-  <div class="home-container">
-    <el-row :gutter="20">
+  <div class="lf-page lf-page--flow">
+    <LfPageHeader title="超级管理员控制面板" />
+
+    <el-row :gutter="20" class="stat-row">
       <el-col :span="12">
         <el-card class="stat-card">
           <template #header>
             <div class="card-header">
               <span>总用户数</span>
+              <el-icon class="card-header-icon"><User /></el-icon>
             </div>
           </template>
           <div class="card-content">
-            <el-statistic :value="userCount">
-              <template #prefix>
-                <el-icon><User /></el-icon>
-              </template>
-            </el-statistic>
+            <span class="stat-value">{{ userCount }}</span>
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="12">
         <el-card class="stat-card">
           <template #header>
             <div class="card-header">
               <span>管理员数</span>
+              <el-icon class="card-header-icon"><UserFilled /></el-icon>
             </div>
           </template>
           <div class="card-content">
-            <el-statistic :value="adminCount">
-              <template #prefix>
-                <el-icon><UserFilled /></el-icon>
-              </template>
-            </el-statistic>
+            <span class="stat-value">{{ adminCount }}</span>
           </div>
         </el-card>
       </el-col>
     </el-row>
-    
+
     <el-card class="welcome-card">
-      <h2>欢迎使用超级管理员后台</h2>
-      <p>您可以在这里管理系统用户和管理员账户</p>
+      <template #header>
+        <div class="card-header"><span>使用说明</span></div>
+      </template>
+      <p class="welcome-text">您可以在这里管理系统用户和管理员账户：左侧「管理员管理」维护后台账号，「用户管理」查看与处理平台用户。</p>
     </el-card>
   </div>
 </template>
@@ -46,6 +44,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAdminStore } from '@/store/modules/admin';
+import LfPageHeader from '@/components/LfPageHeader.vue';
 
 const adminStore = useAdminStore();
 const userCount = ref(0);
@@ -59,11 +58,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.home-container {
-  padding: 20px;
-}
-
-.stat-card {
+/* 与 admin/Home 的概览卡保持同一尺寸与配色 */
+.stat-row {
   margin-bottom: 20px;
 }
 
@@ -73,6 +69,10 @@ onMounted(async () => {
   align-items: center;
 }
 
+.card-header-icon {
+  color: var(--el-color-primary);
+}
+
 .card-content {
   display: flex;
   justify-content: center;
@@ -80,8 +80,21 @@ onMounted(async () => {
   height: 100px;
 }
 
-.welcome-card {
-  text-align: center;
-  padding: 30px;
+.stat-value {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--el-color-primary);
+}
+
+.welcome-text {
+  margin: 0;
+  color: var(--lf-text-regular);
+  line-height: 1.7;
+}
+
+@media screen and (max-width: 1200px) {
+  .stat-row :deep(.el-col) {
+    width: 100%;
+  }
 }
 </style> 

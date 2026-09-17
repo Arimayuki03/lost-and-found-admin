@@ -1,105 +1,45 @@
 <template>
-  <div class="user-management">
-    <el-card>
-      <template #header>
-        <div class="card-header">
-          <span>用户管理</span>
-          <div class="header-right">
-            <el-select v-model="sortOption" placeholder="排序方式" style="width: 150px; margin-right: 10px">
-              <el-option label="按ID排序" value="id" />
-              <el-option label="按用户名排序" value="name" />
-              <el-option label="按学号排序" value="student_id" />
-            </el-select>
-            <el-select v-model="sortDirection" style="width: 120px; margin-right: 20px">
-              <el-option label="升序" value="asc" />
-              <el-option label="降序" value="desc" />
-            </el-select>
-            <el-input
-              v-model="searchQuery"
-              placeholder="搜索用户名或学号"
-              style="width: 300px"
-              clearable
-              @clear="handleSearch"
-            >
-              <template #append>
-                <el-button @click="handleSearch">
-                  <el-icon><Search /></el-icon>
-                </el-button>
-              </template>
-            </el-input>
-          </div>
+  <div class="lf-page">
+    <LfPageHeader title="用户管理" />
+
+    <LfFilterPanel
+      v-model:sort-by="sortOption"
+      v-model:sort-order="sortDirection"
+      v-model:search="searchQuery"
+      :sort-options="sortOptions"
+      search-placeholder="搜索用户名或学号"
+      @search="handleSearch"
+    />
+
+    <LfTable
+      v-model:page="currentPage"
+      v-model:page-size="pageSize"
+      :data="userList"
+      :loading="adminStore.loading"
+      :total="adminStore.usersTotal"
+      :columns="columns"
+      :page-sizes="[10, 20, 50, 100]"
+      empty-text="暂无用户"
+    >
+      <template #avatar="{ row }">
+        <el-avatar :size="40" :src="row.avatar_url || ''" />
+      </template>
+      <template #role="{ row }">
+        <el-tag :type="row.is_admin ? 'success' : 'info'">
+          {{ row.is_admin ? '管理员' : '普通用户' }}
+        </el-tag>
+      </template>
+      <template #actions="{ row }">
+        <div class="operation-buttons">
+          <el-button size="small" type="primary" @click="handleEdit(row)">编辑</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
         </div>
       </template>
-      
-      <el-table
-        v-loading="adminStore.loading"
-        :data="userList"
-        border
-        style="width: 100%"
-      >
-        <el-table-column prop="id" label="ID" width="80" sortable />
-        <el-table-column label="头像" width="100">
-          <template #default="scope">
-            <el-avatar :size="40" :src="scope.row.avatar_url || ''" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="name" label="用户名" sortable />
-        <el-table-column prop="student_id" label="学号" sortable />
-        <el-table-column prop="email" label="邮箱" width="220" show-overflow-tooltip />
-        <el-table-column label="角色" width="100">
-          <template #default="scope">
-            <el-tag :type="scope.row.is_admin ? 'success' : 'info'">
-              {{ scope.row.is_admin ? '管理员' : '普通用户' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="200">
-          <template #default="scope">
-            <div class="action-buttons">
-              <el-button
-                size="small"
-                type="primary"
-                @click="handleEdit(scope.row)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                size="small"
-                type="danger"
-                @click="handleDelete(scope.row)"
-              >
-                删除
-              </el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
-      
-      <div class="pagination">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="adminStore.total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
-    
+    </LfTable>
+
     <!-- 编辑用户对话框 -->
-    <el-dialog
-      v-model="dialogVisible"
-      title="编辑用户"
-      width="500px"
-    >
-      <el-form
-        ref="formRef"
-        :model="userForm"
-        :rules="userRules"
-        label-width="100px"
-      >
+    <el-dialog v-model="dialogVisible" title="编辑用户" width="500px">
+      <el-form ref="formRef" :model="userForm" :rules="userRules" label-width="100px">
         <el-form-item label="头像">
           <el-upload
             class="avatar-uploader"
@@ -123,11 +63,7 @@
           <el-input v-model="userForm.email" />
         </el-form-item>
         <el-form-item label="角色">
-          <el-switch
-            v-model="userForm.is_admin"
-            active-text="管理员"
-            inactive-text="普通用户"
-          />
+          <el-switch v-model="userForm.is_admin" active-text="管理员" inactive-text="普通用户" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -137,13 +73,9 @@
         </span>
       </template>
     </el-dialog>
-    
+
     <!-- 删除确认对话框 -->
-    <el-dialog
-      v-model="deleteDialogVisible"
-      title="确认删除"
-      width="400px"
-    >
+    <el-dialog v-model="deleteDialogVisible" title="确认删除" width="400px">
       <p>确定要删除用户 "{{ currentUser?.name }}" 吗？此操作不可逆。</p>
       <template #footer>
         <span class="dialog-footer">
@@ -156,16 +88,23 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted, watch } from 'vue';
+/**
+ * 超级管理员 · 用户管理（与 admin 侧统一使用 LfPageHeader/LfFilterPanel/LfTable）
+ */
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useAdminStore } from '@/store/modules/admin';
 import { useUserStore } from '@/store/modules/user';
 import { ElMessage } from 'element-plus';
-import { Plus, Search } from '@element-plus/icons-vue';
+import { Plus } from '@element-plus/icons-vue';
+import LfPageHeader from '@/components/LfPageHeader.vue';
+import LfFilterPanel from '@/components/LfFilterPanel.vue';
+import LfTable from '@/components/LfTable.vue';
 
 const adminStore = useAdminStore();
 const userStore = useUserStore();
 // 上传接口已要求登录，el-upload 直传需要手动携带 token
 const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }));
+
 const currentPage = ref(1);
 const pageSize = ref(10);
 const dialogVisible = ref(false);
@@ -176,57 +115,83 @@ const sortOption = ref('id');
 const sortDirection = ref('asc');
 const formRef = ref(null);
 
+const sortOptions = [
+  { label: '按ID排序', value: 'id' },
+  { label: '按用户名排序', value: 'name' },
+  { label: '按学号排序', value: 'student_id' },
+];
+
+const columns = [
+  { prop: 'id', label: 'ID', width: 80 },
+  { label: '头像', width: 100, slot: 'avatar' },
+  { prop: 'name', label: '用户名', minWidth: 120 },
+  { prop: 'student_id', label: '学号', minWidth: 140 },
+  { prop: 'email', label: '邮箱', width: 220, showOverflowTooltip: true },
+  { label: '角色', width: 100, slot: 'role' },
+  { label: '操作', width: 200, slot: 'actions' },
+];
+
 const userForm = reactive({
   id: null,
   name: '',
   student_id: '',
   email: '',
   is_admin: false,
-  avatar_url: ''
+  avatar_url: '',
 });
 
 const userRules = {
   name: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' }
+    { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' },
   ],
-  student_id: [
-    { required: true, message: '请输入学号', trigger: 'blur' }
-  ],
+  student_id: [{ required: true, message: '请输入学号', trigger: 'blur' }],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
-  ]
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
+  ],
 };
 
+// 搜索词在已拉取数据上再做一次客户端过滤（与改造前行为一致）
 const userList = computed(() => {
-  if (!searchQuery.value) {
-    return adminStore.users;
-  }
+  if (!searchQuery.value) return adminStore.users;
   const query = searchQuery.value.toLowerCase();
-  return adminStore.users.filter(user => 
-    user.name.toLowerCase().includes(query) || 
-    user.student_id.toLowerCase().includes(query)
+  return adminStore.users.filter(
+    (user) => user.name.toLowerCase().includes(query) || user.student_id.toLowerCase().includes(query)
   );
 });
 
-onMounted(async () => {
-  await adminStore.fetchUsers(currentPage.value, pageSize.value);
+const fetchUsers = async () => {
+  await adminStore.fetchUsers(currentPage.value, pageSize.value, searchQuery.value, sortOption.value, sortDirection.value);
+};
+
+onMounted(() => {
+  fetchUsers();
 });
 
-const handleSizeChange = (val) => {
-  pageSize.value = val;
+// 分页/排序/搜索变化统一触发拉取；每页容量变化时先回到第 1 页再请求（避免停留在超出范围的页码）
+watch([currentPage, pageSize], ([page, size], [, prevSize]) => {
+  if (size !== prevSize && page !== 1) {
+    currentPage.value = 1; // 重置页码后会再次进入本 watch 发起请求
+    return;
+  }
   fetchUsers();
-};
+});
+// 排序变化：回到第 1 页；已在第 1 页时页码赋值不触发分页 watch，这里补发唯一请求
+watch([sortOption, sortDirection], () => {
+  if (currentPage.value === 1) {
+    fetchUsers();
+  } else {
+    currentPage.value = 1; // 分页 watch 会发起唯一请求
+  }
+});
 
-const handleCurrentChange = (val) => {
-  currentPage.value = val;
-  fetchUsers();
-};
-
-const handleSearch = async () => {
-  await fetchUsers();
-  currentPage.value = 1;
+const handleSearch = () => {
+  if (currentPage.value === 1) {
+    fetchUsers(); // 已在第 1 页，页码赋值不会触发 watch，这里补发
+  } else {
+    currentPage.value = 1; // 分页 watch 会发起唯一请求
+  }
 };
 
 // 头像上传相关方法
@@ -238,18 +203,13 @@ const handleAvatarSuccess = (response) => {
 const beforeAvatarUpload = (file) => {
   const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
   const isLt2M = file.size / 1024 / 1024 < 2;
-
-  if (!isJPG) {
-    ElMessage.error('头像只能是JPG或PNG格式!');
-  }
-  if (!isLt2M) {
-    ElMessage.error('头像大小不能超过2MB!');
-  }
+  if (!isJPG) ElMessage.error('头像只能是JPG或PNG格式!');
+  if (!isLt2M) ElMessage.error('头像大小不能超过2MB!');
   return isJPG && isLt2M;
 };
 
 const handleEdit = (row) => {
-  Object.keys(userForm).forEach(key => {
+  Object.keys(userForm).forEach((key) => {
     userForm[key] = row[key];
   });
   dialogVisible.value = true;
@@ -262,14 +222,13 @@ const handleDelete = (row) => {
 
 const submitForm = async () => {
   if (!formRef.value) return;
-
   await formRef.value.validate(async (valid) => {
     if (valid) {
       const result = await adminStore.updateUser(userForm.id, userForm);
       // 失败时保持弹窗打开，让用户修正后重试（store 内已有错误提示）
       if (result !== false) {
         dialogVisible.value = false;
-        await fetchUsers();
+        await fetchUsers(); // store 不再内置刷新，此处是本页列表的唯一刷新点
       }
     } else {
       ElMessage.error('请正确填写表单信息');
@@ -284,48 +243,13 @@ const confirmDelete = async () => {
     if (result !== false) {
       deleteDialogVisible.value = false;
       currentUser.value = null;
+      await fetchUsers(); // store 不再内置刷新，本页刷新自己展示的用户列表
     }
   }
-};
-
-// 监听排序选项变化，重新加载数据
-watch([sortOption, sortDirection], () => {
-  fetchUsers();
-});
-
-const fetchUsers = async () => {
-  await adminStore.fetchUsers(
-    currentPage.value,
-    pageSize.value,
-    searchQuery.value,
-    sortOption.value,
-    sortDirection.value
-  );
 };
 </script>
 
 <style scoped>
-.user-management {
-  padding: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.pagination {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
@@ -344,7 +268,7 @@ const fetchUsers = async () => {
 }
 
 .avatar-uploader:hover {
-  border-color: #409EFF;
+  border-color: var(--el-color-primary);
 }
 
 .avatar-uploader-icon {
@@ -361,21 +285,4 @@ const fetchUsers = async () => {
   height: 100px;
   display: block;
 }
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px; /* 增加按钮之间的间距 */
-}
-
-.el-button {
-  padding: 8px 15px;
-  border-radius: 4px;
-  transition: all 0.3s;
-}
-
-.el-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-</style> 
+</style>

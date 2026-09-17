@@ -9,6 +9,7 @@ export const useUserStore = defineStore('user', {
     token: localStorage.getItem('token') || '',
     refreshToken: localStorage.getItem('refreshToken') || '',
     role: localStorage.getItem('role') || '', // 'admin' 或 'superadmin'
+    lastLoginError: '', // 最近一次登录失败的后端文案（如账号锁定/限流提示）
   }),
   
   getters: {
@@ -18,7 +19,12 @@ export const useUserStore = defineStore('user', {
   },
   
   actions: {
+    /**
+     * 登录。返回 true/false；失败时错误文案写入 this.lastLoginError，
+     * 优先取后端 response.data.error（如 429 锁定/限流提示），无则回退通用文案。
+     */
     async loginAsAdmin(adminForm) {
+      this.lastLoginError = '';
       try {
         const response = await adminLogin({
           student_id: adminForm.student_id,
@@ -27,16 +33,19 @@ export const useUserStore = defineStore('user', {
         this.setUserData(response, 'admin');
         return true;
       } catch (error) {
+        this.lastLoginError = error?.response?.data?.error || '用户名或密码错误';
         return false;
       }
     },
-    
+
     async loginAsSuperAdmin(credentials) {
+      this.lastLoginError = '';
       try {
         const response = await superAdminLogin(credentials);
         this.setUserData(response, 'superadmin');
         return true;
       } catch (error) {
+        this.lastLoginError = error?.response?.data?.error || '用户名或密码错误';
         return false;
       }
     },

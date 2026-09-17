@@ -1,86 +1,41 @@
 <template>
-  <div class="admin-management">
-    <el-card>
-      <template #header>
-        <div class="card-header">
-          <span>管理员列表</span>
-          <div class="header-right">
-            <el-select v-model="sortOption" placeholder="排序方式" style="width: 150px; margin-right: 10px">
-              <el-option label="按ID排序" value="id" />
-              <el-option label="按用户名排序" value="name" />
-              <el-option label="按学号排序" value="student_id" />
-            </el-select>
-            <el-select v-model="sortDirection" style="width: 120px; margin-right: 20px">
-              <el-option label="升序" value="asc" />
-              <el-option label="降序" value="desc" />
-            </el-select>
-            <el-button type="primary" @click="openAddDialog">添加管理员</el-button>
-          </div>
+  <div class="lf-page">
+    <LfPageHeader title="管理员管理">
+      <template #actions>
+        <el-button type="primary" @click="openAddDialog">添加管理员</el-button>
+      </template>
+    </LfPageHeader>
+
+    <LfFilterPanel
+      v-model:sort-by="sortOption"
+      v-model:sort-order="sortDirection"
+      :sort-options="sortOptions"
+    />
+
+    <LfTable
+      v-model:page="currentPage"
+      v-model:page-size="pageSize"
+      :data="adminList"
+      :loading="adminStore.loading"
+      :total="adminStore.adminsTotal"
+      :columns="columns"
+      :page-sizes="[10, 20, 50, 100]"
+      empty-text="暂无管理员"
+    >
+      <template #avatar="{ row }">
+        <el-avatar :size="40" :src="row.avatar_url || ''" />
+      </template>
+      <template #actions="{ row }">
+        <div class="operation-buttons">
+          <el-button size="small" type="primary" @click="handleEdit(row)">编辑</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
         </div>
       </template>
-      
-      <el-table
-        v-loading="adminStore.loading"
-        :data="adminList"
-        border
-        style="width: 100%"
-      >
-        <el-table-column prop="id" label="ID" width="80" sortable />
-        <el-table-column label="头像" width="100">
-          <template #default="scope">
-            <el-avatar :size="40" :src="scope.row.avatar_url || ''" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="name" label="用户名" sortable />
-        <el-table-column prop="student_id" label="学号" sortable />
-        <el-table-column prop="email" label="邮箱" width="220" show-overflow-tooltip />
-        <el-table-column label="操作" width="200">
-          <template #default="scope">
-            <div class="action-buttons">
-              <el-button
-                size="small"
-                type="primary"
-                @click="handleEdit(scope.row)"
-              >
-                编辑
-              </el-button>
-              <el-button
-                size="small"
-                type="danger"
-                @click="handleDelete(scope.row)"
-              >
-                删除
-              </el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
-      
-      <div class="pagination">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="adminStore.total"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
-    
+    </LfTable>
+
     <!-- 添加/编辑管理员对话框 -->
-    <el-dialog
-      v-model="dialogVisible"
-      :title="dialogType === 'add' ? '添加管理员' : '编辑管理员'"
-      width="500px"
-    >
-      <el-form
-        ref="formRef"
-        :model="adminForm"
-        :rules="formRules"
-        label-width="100px"
-      >
+    <el-dialog v-model="dialogVisible" :title="dialogType === 'add' ? '添加管理员' : '编辑管理员'" width="500px">
+      <el-form ref="formRef" :model="adminForm" :rules="formRules" label-width="100px">
         <el-form-item label="头像">
           <el-upload
             class="avatar-uploader"
@@ -114,13 +69,9 @@
         </div>
       </template>
     </el-dialog>
-    
+
     <!-- 删除确认对话框 -->
-    <el-dialog
-      v-model="deleteDialogVisible"
-      title="确认删除"
-      width="400px"
-    >
+    <el-dialog v-model="deleteDialogVisible" title="确认删除" width="400px">
       <p>确定要删除管理员 {{ currentAdmin?.name }} 吗？此操作不可恢复。</p>
       <template #footer>
         <div class="dialog-footer">
@@ -133,16 +84,23 @@
 </template>
 
 <script setup>
+/**
+ * 超级管理员 · 管理员管理（与 admin 侧统一使用 LfPageHeader/LfFilterPanel/LfTable）
+ */
 import { ref, reactive, computed, watch } from 'vue';
 import { useAdminStore } from '@/store/modules/admin';
 import { useUserStore } from '@/store/modules/user';
 import { ElMessage } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
+import LfPageHeader from '@/components/LfPageHeader.vue';
+import LfFilterPanel from '@/components/LfFilterPanel.vue';
+import LfTable from '@/components/LfTable.vue';
 
 const adminStore = useAdminStore();
 const userStore = useUserStore();
 // 上传接口已要求登录，el-upload 直传需要手动携带 token
 const uploadHeaders = computed(() => ({ Authorization: `Bearer ${userStore.token}` }));
+
 const currentPage = ref(1);
 const pageSize = ref(10);
 const sortOption = ref('id'); // 默认按ID排序
@@ -153,6 +111,21 @@ const deleteDialogVisible = ref(false);
 const currentAdmin = ref(null);
 const formRef = ref(null);
 
+const sortOptions = [
+  { label: '按ID排序', value: 'id' },
+  { label: '按用户名排序', value: 'name' },
+  { label: '按学号排序', value: 'student_id' },
+];
+
+const columns = [
+  { prop: 'id', label: 'ID', width: 80 },
+  { label: '头像', width: 100, slot: 'avatar' },
+  { prop: 'name', label: '用户名', minWidth: 120 },
+  { prop: 'student_id', label: '学号', minWidth: 140 },
+  { prop: 'email', label: '邮箱', width: 220, showOverflowTooltip: true },
+  { label: '操作', width: 200, slot: 'actions' },
+];
+
 const adminForm = reactive({
   id: '',
   name: '',
@@ -160,51 +133,44 @@ const adminForm = reactive({
   email: '',
   password: '',
   is_admin: true,
-  avatar_url: ''
+  avatar_url: '',
 });
 
 const formRules = {
-  name: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
-  ],
-  student_id: [
-    { required: true, message: '请输入学号', trigger: 'blur' }
-  ],
+  name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  student_id: [{ required: true, message: '请输入学号', trigger: 'blur' }],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6个字符', trigger: 'blur' }
-  ]
-};
-
-// 监听排序选项变化，重新加载数据
-watch([sortOption, sortDirection], () => {
-  fetchAdmins();
-});
-
-const fetchAdmins = async () => {
-  await adminStore.fetchAdmins(
-    currentPage.value, 
-    pageSize.value,
-    sortOption.value,
-    sortDirection.value
-  );
+    { min: 6, message: '密码长度不能少于6个字符', trigger: 'blur' },
+  ],
 };
 
 const adminList = computed(() => adminStore.admins);
 
-const handleSizeChange = (val) => {
-  pageSize.value = val;
-  fetchAdmins();
+const fetchAdmins = async () => {
+  await adminStore.fetchAdmins(currentPage.value, pageSize.value, sortOption.value, sortDirection.value);
 };
 
-const handleCurrentChange = (val) => {
-  currentPage.value = val;
+// 分页/排序变化统一触发拉取；每页容量变化时先回到第 1 页再请求（避免停留在超出范围的页码）
+watch([currentPage, pageSize], ([page, size], [, prevSize]) => {
+  if (size !== prevSize && page !== 1) {
+    currentPage.value = 1; // 重置页码后会再次进入本 watch 发起请求
+    return;
+  }
   fetchAdmins();
-};
+});
+// 排序变化：回到第 1 页；已在第 1 页时页码赋值不触发分页 watch，这里补发唯一请求
+watch([sortOption, sortDirection], () => {
+  if (currentPage.value === 1) {
+    fetchAdmins();
+  } else {
+    currentPage.value = 1; // 分页 watch 会发起唯一请求
+  }
+});
 
 const openAddDialog = () => {
   dialogType.value = 'add';
@@ -226,6 +192,9 @@ const handleDelete = (row) => {
 };
 
 const resetForm = () => {
+  // 先 resetFields 恢复 initialValue，再手工清空，
+  // 避免 initialValue 恰为某条编辑记录时被覆盖回去（参照 admin/Announcements.vue 的顺序）
+  if (formRef.value) formRef.value.resetFields();
   adminForm.id = '';
   adminForm.name = '';
   adminForm.student_id = '';
@@ -233,9 +202,6 @@ const resetForm = () => {
   adminForm.password = '';
   adminForm.is_admin = true;
   adminForm.avatar_url = '';
-  if (formRef.value) {
-    formRef.value.resetFields();
-  }
 };
 
 // 头像上传相关方法
@@ -247,26 +213,17 @@ const handleAvatarSuccess = (response) => {
 const beforeAvatarUpload = (file) => {
   const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
   const isLt2M = file.size / 1024 / 1024 < 2;
-
-  if (!isJPG) {
-    ElMessage.error('头像只能是JPG或PNG格式!');
-  }
-  if (!isLt2M) {
-    ElMessage.error('头像大小不能超过2MB!');
-  }
+  if (!isJPG) ElMessage.error('头像只能是JPG或PNG格式!');
+  if (!isLt2M) ElMessage.error('头像大小不能超过2MB!');
   return isJPG && isLt2M;
 };
 
 const submitForm = async () => {
   if (!formRef.value) return;
-
   await formRef.value.validate(async (valid) => {
     if (valid) {
-      // 处理表单数据
       const formData = { ...adminForm };
-      if (!formData.avatar_url) {
-        formData.avatar_url = '';
-      }
+      if (!formData.avatar_url) formData.avatar_url = '';
 
       let result;
       if (dialogType.value === 'add') {
@@ -278,6 +235,7 @@ const submitForm = async () => {
       // 失败时保持弹窗打开，让用户修正后重试（store 内已有错误提示）
       if (result !== false) {
         dialogVisible.value = false;
+        await fetchAdmins(); // store 不再内置刷新，本页刷新自己展示的管理员列表
       }
     } else {
       ElMessage.error('请正确填写表单信息');
@@ -292,6 +250,7 @@ const confirmDelete = async () => {
     if (result !== false) {
       deleteDialogVisible.value = false;
       currentAdmin.value = null;
+      await fetchAdmins(); // store 不再内置刷新，本页刷新自己展示的管理员列表
     }
   }
 };
@@ -301,30 +260,10 @@ fetchAdmins();
 </script>
 
 <style scoped>
-.admin-management {
-  padding: 20px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.pagination {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
-}
-
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
 }
 
 .avatar-uploader {
@@ -340,7 +279,7 @@ fetchAdmins();
 }
 
 .avatar-uploader:hover {
-  border-color: #409EFF;
+  border-color: var(--el-color-primary);
 }
 
 .avatar-uploader-icon {
@@ -357,21 +296,4 @@ fetchAdmins();
   height: 100px;
   display: block;
 }
-
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px; /* 增加按钮之间的间距 */
-}
-
-.el-button {
-  padding: 8px 15px;
-  border-radius: 4px;
-  transition: all 0.3s;
-}
-
-.el-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-</style> 
+</style>

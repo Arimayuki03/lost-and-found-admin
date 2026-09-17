@@ -32,14 +32,15 @@ export default [
       {
         path: 'lost-items',
         name: 'LostItems',
-        component: () => import('@/views/admin/LostItems.vue'),
-        meta: { title: '失物管理' }
+        // 失物/拾物共用配置驱动页面，meta.type 决定文案/时间字段/接口
+        component: () => import('@/views/admin/ItemsManagement.vue'),
+        meta: { title: '失物管理', type: 'lost' }
       },
       {
         path: 'found-items',
         name: 'FoundItems',
-        component: () => import('@/views/admin/FoundItems.vue'),
-        meta: { title: '拾物管理' }
+        component: () => import('@/views/admin/ItemsManagement.vue'),
+        meta: { title: '拾物管理', type: 'found' }
       },
       {
         path: 'feedback',

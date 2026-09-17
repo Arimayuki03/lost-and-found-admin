@@ -1,0 +1,46 @@
+/**
+ * 全局设计变量（唯一主题定义点，见 前端UI优化方案.md 2.2 节）
+ *
+ * 统一主色为深蓝 #1e40af（替换 EP 默认蓝 #409EFF 与散落的 #1e3a8a）。
+ * EP 的 5 档 light/dark 变量按官方混色规则生成，hover/active 等状态自动跟随。
+ * 业务样式引用业务变量（--lf-*），不要硬编码色值。
+ */
+:root {
+  /* Element Plus 主色覆盖（深蓝） */
+  --el-color-primary: #1e40af;
+  --el-color-primary-light-3: #4a68c6;
+  --el-color-primary-light-5: #758bd7;
+  --el-color-primary-light-7: #a1b0e7;
+  --el-color-primary-light-8: #b6c2ed;
+  --el-color-primary-light-9: #d4dbf5;
+  --el-color-primary-dark-2: #1a3390;
+
+  /* 业务变量 */
+  --lf-bg-page: #f5f7fa;        /* 页面底色 */
+  --lf-bg-card: #ffffff;        /* 卡片底色 */
+  --lf-sidebar-bg: #304156;     /* 侧边栏深灰 */
+  --lf-sidebar-text: #bfcbd9;   /* 侧边栏文字 */
+  --lf-text-title: #1f2329;     /* 标题文字 */
+  --lf-text-regular: #4e5969;   /* 正文文字 */
+  --lf-radius-card: 8px;        /* 卡片圆角 */
+  --lf-shadow-card: 0 1px 4px rgba(0, 0, 0, 0.05); /* 卡片阴影 */
+  --lf-header-bg: #f0f7ff;      /* 表头底色 */
+
+  /* 布局尺寸（AdminLayout 统一管理） */
+  --sidebar-width: 200px;
+  --header-height: 56px;
+
+  /* 中性色阶（页面/卡片/边框/文字统一引用，业务样式里不再硬编码灰值） */
+  --lf-border-color: #e5e7eb;       /* 常规描边 */
+  --lf-border-color-light: #ebeef5; /* 分隔线（表头/分页） */
+  --lf-text-secondary: #909399;     /* 辅助文字、空态占位 */
+  --lf-text-placeholder: #a8abb2;   /* 输入框占位符 */
+  --lf-fill-light: #f4f4f5;         /* 浅填充（分页按钮底） */
+  --lf-fill-lighter: #f9fafb;       /* 斑马纹 / hover 底 */
+  --lf-fill-dark: #f0f2f5;          /* 图标按钮 hover 底 */
+
+  /* 圆角与阴影 */
+  --lf-radius-sm: 4px;
+  --lf-radius-md: 6px;
+  --lf-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+}

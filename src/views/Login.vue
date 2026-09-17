@@ -2,6 +2,7 @@
   <div class="login-container">
     <div class="login-box">
       <div class="login-header">
+        <img class="login-logo" src="@/assets/images/logo.png" alt="失物招领" />
         <h2 class="login-title">失物招领后台管理系统</h2>
         <p class="login-subtitle">欢迎使用，请登录您的账号</p>
       </div>
@@ -45,7 +46,7 @@
       </el-tabs>
       
       <div class="login-footer">
-        <p>© 2025 失物招领后台管理系统</p>
+        <p>© {{ currentYear }} 失物招领后台管理系统</p>
       </div>
     </div>
   </div>
@@ -60,6 +61,7 @@ import { ElMessage } from 'element-plus';
 const router = useRouter();
 const userStore = useUserStore();
 const activeTab = ref('admin');
+const currentYear = new Date().getFullYear();
 
 // 表单引用
 const adminFormRef = ref(null);
@@ -108,7 +110,8 @@ const loginAsAdmin = async () => {
           ElMessage.success('管理员登录成功');
           router.push('/admin-dashboard');
         } else {
-          ElMessage.error('登录失败：用户名或密码错误');
+          // 优先显示后端返回的文案（如账号锁定/限流），无则回退通用提示
+          ElMessage.error('登录失败：' + (userStore.lastLoginError || '用户名或密码错误'));
         }
       } catch (error) {
         // 避免输出包含敏感信息的错误
@@ -137,7 +140,8 @@ const loginAsSuperAdmin = async () => {
           ElMessage.success('超级管理员登录成功');
           router.push('/superadmin-dashboard');
         } else {
-          ElMessage.error('登录失败：用户名或密码错误');
+          // 优先显示后端返回的文案（如账号锁定/限流），无则回退通用提示
+          ElMessage.error('登录失败：' + (userStore.lastLoginError || '用户名或密码错误'));
         }
       } catch (error) {
         // 避免输出包含敏感信息的错误
@@ -205,6 +209,15 @@ const loginAsSuperAdmin = async () => {
   margin-bottom: 25px;
 }
 
+.login-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  object-fit: contain;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 14px rgba(30, 64, 175, 0.25);
+}
+
 .login-title {
   font-size: 28px;
   color: #303133;
@@ -214,7 +227,7 @@ const loginAsSuperAdmin = async () => {
 
 .login-subtitle {
   font-size: 14px;
-  color: #909399;
+  color: var(--lf-text-secondary);
   margin-bottom: 20px;
 }
 
@@ -246,7 +259,7 @@ const loginAsSuperAdmin = async () => {
   margin-top: 20px;
   text-align: center;
   font-size: 12px;
-  color: #909399;
+  color: var(--lf-text-secondary);
 }
 
 :deep(.el-input__wrapper) {

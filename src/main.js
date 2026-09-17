@@ -5,6 +5,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import './styles/variables.css'
 import './style.css'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 

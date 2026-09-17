@@ -6,7 +6,8 @@ export const useAdminStore = defineStore('superAdminManagement', {
   state: () => ({
     users: [],
     admins: [],
-    total: 0,
+    usersTotal: 0,
+    adminsTotal: 0,
     loading: false,
     currentPage: 1,
     pageSize: 10
@@ -24,7 +25,7 @@ export const useAdminStore = defineStore('superAdminManagement', {
           sort_order: sortOrder
         });
         this.users = response.items;
-        this.total = response.total;
+        this.usersTotal = response.total;
         this.currentPage = page;
         this.pageSize = size;
         return response;
@@ -41,7 +42,7 @@ export const useAdminStore = defineStore('superAdminManagement', {
       try {
         const response = await getAdmins(page, size, sortBy, sortOrder);
         this.admins = response.items;
-        this.total = response.total;
+        this.adminsTotal = response.total;
         this.currentPage = page;
         this.pageSize = size;
         return response;
@@ -79,8 +80,8 @@ export const useAdminStore = defineStore('superAdminManagement', {
         
         const response = await updateUser(userId, userData);
         ElMessage.success('更新用户信息成功');
-        await this.fetchUsers(this.currentPage, this.pageSize);
-        await this.fetchAdmins(this.currentPage, this.pageSize);
+        // 不在此处刷新列表：由调用页面刷新自己展示的列表，
+        // 避免两个列表的 fetch 相互覆盖分页状态（usersTotal/adminsTotal 已拆分）
         return response;
       } catch (error) {
         ElMessage.error('更新用户信息失败');
@@ -92,8 +93,8 @@ export const useAdminStore = defineStore('superAdminManagement', {
       try {
         const response = await deleteUser(userId);
         ElMessage.success('删除用户成功');
-        await this.fetchUsers(this.currentPage, this.pageSize);
-        await this.fetchAdmins(this.currentPage, this.pageSize);
+        // 不在此处刷新列表：由调用页面刷新自己展示的列表，
+        // 避免两个列表的 fetch 相互覆盖分页状态（usersTotal/adminsTotal 已拆分）
         return response;
       } catch (error) {
         ElMessage.error('删除用户失败');
