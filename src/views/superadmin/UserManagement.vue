@@ -69,7 +69,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitForm">确认</el-button>
+          <el-button type="primary" @click="submitForm" :loading="submitting">确认</el-button>
         </span>
       </template>
     </el-dialog>
@@ -114,6 +114,7 @@ const searchQuery = ref('');
 const sortOption = ref('id');
 const sortDirection = ref('asc');
 const formRef = ref(null);
+const submitting = ref(false); // 提交进行中：按钮 loading 并防重复提交
 
 const sortOptions = [
   { label: '按ID排序', value: 'id' },
@@ -152,14 +153,10 @@ const userRules = {
   ],
 };
 
-// 搜索词在已拉取数据上再做一次客户端过滤（与改造前行为一致）
-const userList = computed(() => {
-  if (!searchQuery.value) return adminStore.users;
-  const query = searchQuery.value.toLowerCase();
-  return adminStore.users.filter(
-    (user) => user.name.toLowerCase().includes(query) || user.student_id.toLowerCase().includes(query)
-  );
-});
+// 列表直接信任后端返回：搜索关键词已随请求透传（/sadmin/users 按
+// name/student_id/email 服务端模糊匹配），不再做客户端二次过滤，
+// 避免"客户端过滤清空了列表、total 却不变"的口径不一致问题
+const userList = computed(() => adminStore.users);
 
 const fetchUsers = async () => {
   await adminStore.fetchUsers(currentPage.value, pageSize.value, searchQuery.value, sortOption.value, sortDirection.value);
@@ -224,11 +221,16 @@ const submitForm = async () => {
   if (!formRef.value) return;
   await formRef.value.validate(async (valid) => {
     if (valid) {
-      const result = await adminStore.updateUser(userForm.id, userForm);
-      // 失败时保持弹窗打开，让用户修正后重试（store 内已有错误提示）
-      if (result !== false) {
-        dialogVisible.value = false;
-        await fetchUsers(); // store 不再内置刷新，此处是本页列表的唯一刷新点
+      submitting.value = true;
+      try {
+        const result = await adminStore.updateUser(userForm.id, userForm);
+        // 失败时保持弹窗打开，让用户修正后重试（store 内已有错误提示）
+        if (result !== false) {
+          dialogVisible.value = false;
+          await fetchUsers(); // store 不再内置刷新，此处是本页列表的唯一刷新点
+        }
+      } finally {
+        submitting.value = false;
       }
     } else {
       ElMessage.error('请正确填写表单信息');

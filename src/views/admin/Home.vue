@@ -59,16 +59,20 @@
           <template #header><div class="card-header"><span>匹配状态统计</span></div></template>
           <div class="status-summary">
             <div class="status-item">
-              <div class="status-label">已匹配物品</div>
-              <div class="status-value">{{ stats.matchedItems || 0 }}</div>
+              <div class="status-label">已匹配失物</div>
+              <div class="status-value">{{ matching.matched.lost || 0 }}</div>
+            </div>
+            <div class="status-item">
+              <div class="status-label">已匹配拾物</div>
+              <div class="status-value">{{ matching.matched.found || 0 }}</div>
             </div>
             <div class="status-item">
               <div class="status-label">未匹配失物</div>
-              <div class="status-value">{{ Math.round(stats.lostTotal - stats.matchedItems) || 0 }}</div>
+              <div class="status-value">{{ matching.unmatched.lost || 0 }}</div>
             </div>
             <div class="status-item">
               <div class="status-label">未匹配拾物</div>
-              <div class="status-value">{{ Math.round(stats.foundTotal - stats.matchedItems) || 0 }}</div>
+              <div class="status-value">{{ matching.unmatched.found || 0 }}</div>
             </div>
           </div>
         </el-card>
@@ -133,13 +137,14 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import { getStats, getLostItemsStats, getFoundItemsStats, runMatching as runMatchingApi } from '@/api/admin';
+import { getStats, getMatchingStats, getLostItemsStats, getFoundItemsStats, runMatching as runMatchingApi } from '@/api/admin';
 import { categoryPieOption, trendLineOption, locationBarOption, gaugeOption, CHART_COLORS } from '@/utils/chartTheme';
 import LfChart from '@/components/LfChart.vue';
 import LfPageHeader from '@/components/LfPageHeader.vue';
 
 const router = useRouter();
 const stats = ref({});
+const matching = ref({ matched: {}, unmatched: {}, matchRate: {} });
 const matchingLoading = ref(false);
 const timeRange = ref('all'); // 默认使用全部时间
 
@@ -148,7 +153,7 @@ const lostStats = ref({});
 const foundStats = ref({});
 
 // option 工厂（失物/拾物共用，仅配色区分）
-const gaugeOptions = computed(() => gaugeOption(stats.value.matchSuccessRate || 0));
+const gaugeOptions = computed(() => gaugeOption(matching.value.matchRate?.overall || 0));
 const lostCategoryOptions = computed(() => categoryPieOption(lostStats.value.categoryStats || []));
 const foundCategoryOptions = computed(() => categoryPieOption(foundStats.value.categoryStats || []));
 const lostTrendOptions = computed(() => trendLineOption(lostStats.value.timeStats || [], { name: '失物数量', color: CHART_COLORS.lost }));
@@ -158,7 +163,7 @@ const foundLocationOptions = computed(() => locationBarOption(foundStats.value.l
 
 // 刷新所有数据
 const refreshData = async () => {
-  await Promise.all([fetchBasicStats(), fetchLostItemsStats(), fetchFoundItemsStats()]);
+  await Promise.all([fetchBasicStats(), fetchMatchingStats(), fetchLostItemsStats(), fetchFoundItemsStats()]);
 };
 
 // 获取基础统计数据
@@ -167,6 +172,20 @@ const fetchBasicStats = async () => {
     stats.value = await getStats();
   } catch (error) {
     ElMessage.error('获取统计数据失败');
+  }
+};
+
+// 获取匹配统计（真实物品口径，用于仪表盘与匹配状态卡片）
+const fetchMatchingStats = async () => {
+  try {
+    const response = await getMatchingStats();
+    if (!response) {
+      ElMessage.warning('未获取到匹配统计数据');
+      return;
+    }
+    matching.value = response;
+  } catch (error) {
+    ElMessage.error('获取匹配统计数据失败');
   }
 };
 
@@ -202,23 +221,25 @@ const fetchFoundItemsStats = async () => {
 const refreshTimer = ref(null);
 
 const runMatching = async () => {
+  matchingLoading.value = true;
   try {
-    matchingLoading.value = true;
-    await runMatchingApi();
-    ElMessage.success('匹配功能运行成功');
-    ElMessage.info('正在刷新数据，请稍候...');
-    // 延迟2秒再刷新数据，确保后端数据已经完全更新
-    clearTimeout(refreshTimer.value); // 防止连点叠加多个定时器
-    refreshTimer.value = setTimeout(async () => {
-      try {
-        stats.value = {};
-        await refreshData();
-        ElMessage.success('数据已成功刷新');
-      } catch (error) {
-        ElMessage.error('数据刷新失败');
-        console.error('刷新数据出错:', error);
-      }
-    }, 2000);
+    const response = await runMatchingApi();
+    // 后端 /admin/run 在后台线程执行匹配并立即返回，响应仅代表任务启动成功
+    if (response && response.success) {
+      ElMessage.success('匹配任务已在后台启动，稍后自动刷新');
+      // 延时后刷新一次统计数据，给后台匹配留出执行时间
+      clearTimeout(refreshTimer.value); // 防止连点叠加多个定时器
+      refreshTimer.value = setTimeout(async () => {
+        try {
+          await refreshData();
+        } catch (error) {
+          ElMessage.error('数据刷新失败');
+          console.error('刷新数据出错:', error);
+        }
+      }, 3000);
+    } else {
+      ElMessage.warning(response?.message || '匹配任务未成功启动，请稍后重试');
+    }
   } catch (error) {
     ElMessage.error('运行匹配功能失败');
     console.error('运行匹配出错:', error);

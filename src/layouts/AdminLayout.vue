@@ -21,6 +21,7 @@
         background-color="var(--lf-sidebar-bg)"
         text-color="var(--lf-sidebar-text)"
         active-text-color="var(--el-color-primary-light-5)"
+        @select="handleMenuSelect"
       >
         <template v-for="item in menus" :key="item.title">
           <el-sub-menu v-if="item.children" :index="item.title">
@@ -115,17 +116,27 @@ const toggleSidebar = () => {
 
 const toggleFullScreen = () => {
   if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().then(() => {
-      isFullscreen.value = true;
-    }).catch((err) => {
+    document.documentElement.requestFullscreen().catch((err) => {
       console.error(`全屏请求错误: ${err.message}`);
     });
   } else if (document.exitFullscreen) {
-    document.exitFullscreen().then(() => {
-      isFullscreen.value = false;
-    }).catch((err) => {
+    document.exitFullscreen().catch((err) => {
       console.error(`退出全屏错误: ${err.message}`);
     });
+  }
+};
+
+// 全屏状态统一由 fullscreenchange 事件驱动：
+// 用户按 ESC 或 F11 退出全屏时不会触发 toggleFullScreen，
+// 不监听该事件图标会与实际全屏状态脱节
+const onFullscreenChange = () => {
+  isFullscreen.value = !!document.fullscreenElement;
+};
+
+// 窄屏抽屉模式下点菜单跳转后自动收起抽屉（桌面折叠模式不受影响）
+const handleMenuSelect = () => {
+  if (isMobile.value) {
+    drawerOpen.value = false;
   }
 };
 
@@ -157,8 +168,12 @@ watch(
 onMounted(() => {
   onResize();
   window.addEventListener('resize', onResize);
+  document.addEventListener('fullscreenchange', onFullscreenChange);
 });
-onBeforeUnmount(() => window.removeEventListener('resize', onResize));
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize);
+  document.removeEventListener('fullscreenchange', onFullscreenChange);
+});
 </script>
 
 <style scoped>

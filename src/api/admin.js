@@ -81,6 +81,14 @@ export function runMatching() {
   });
 }
 
+// 获取匹配统计（真实物品口径：matched/unmatched/matchRate，区别于 /admin/stats 的匹配对口径）
+export function getMatchingStats() {
+  return request({
+    url: '/admin/matching/stats',
+    method: 'get'
+  });
+}
+
 /**
  * 获取公告列表
  * @param {Number} page 页码
@@ -186,14 +194,15 @@ export function getLostItems(page = 1, size = 10, query = '', sortBy = 'id', sor
   });
 }
 
-// 获取未审核失物列表
-export function getUnreviewedLostItems(page = 1, size = 10, sort_by = 'id', sort_order = 'desc') {
+// 获取未审核失物列表（keyword: 搜索关键词，由后端跨字段模糊匹配）
+export function getUnreviewedLostItems(page = 1, size = 10, keyword = '', sort_by = 'id', sort_order = 'desc') {
   return request({
     url: '/admin/lost-items/unreviewed',
     method: 'get',
     params: {
       page,
       size,
+      keyword,
       sort_by,
       sort_order
     }
@@ -211,15 +220,16 @@ export const searchLostItems = (params, page = 1, size = 10) => {
   
   // 处理所有过滤参数
   for (const [key, value] of Object.entries(params)) {
-    // 特殊处理布尔值参数
+    // 布尔值参数仅在显式提供时参与过滤，空值（''/null/undefined）直接跳过，
+    // 避免 String('') 之类把无效值拼进 URL
     if (key === 'is_under_review' || key === 'is_completed') {
-      // 确保布尔值被转换为字符串的'true'或'false'
+      if (value === '' || value === null || value === undefined) continue;
       queryParams.append(key, String(value));
-    } else {
+    } else if (value !== '' && value !== null && value !== undefined) {
       queryParams.append(key, value);
     }
   }
-  
+
   // 修正URL路径
   return request.get(`/admin/lost-items/sift?${queryParams.toString()}`);
 };
@@ -253,7 +263,7 @@ export function getFoundItems(page, size, params) {
   });
 }
 
-// 获取未审核拾物
+// 获取未审核拾物（keyword: 搜索关键词，由后端跨字段模糊匹配）
 export function getUnreviewedFoundItems(page = 1, size = 10, params = {}) {
   return request({
     url: '/admin/found-items/unreviewed',
@@ -277,15 +287,16 @@ export const searchFoundItems = (params, page = 1, size = 10) => {
   
   // 处理所有过滤参数
   for (const [key, value] of Object.entries(params)) {
-    // 特殊处理布尔值参数
+    // 布尔值参数仅在显式提供时参与过滤，空值（''/null/undefined）直接跳过，
+    // 避免 String('') 之类把无效值拼进 URL
     if (key === 'is_under_review' || key === 'is_completed') {
-      // 确保布尔值被转换为字符串的'true'或'false'
+      if (value === '' || value === null || value === undefined) continue;
       queryParams.append(key, String(value));
-    } else {
+    } else if (value !== '' && value !== null && value !== undefined) {
       queryParams.append(key, value);
     }
   }
-  
+
   // 修正URL路径
   return request.get(`/admin/found-items/sift?${queryParams.toString()}`);
 };

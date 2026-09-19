@@ -23,6 +23,8 @@
 ## 安全基线说明
 
 - 本项目为纯前端管理端，认证依赖后端签发的 JWT（access_token / refresh_token），token 存储于 `localStorage`。部署时请确保整站 HTTPS，并自行评估 token 存储策略是否符合你的安全要求。
+- 路由守卫解析 access token 的 JWT payload 交叉校验角色（白名单 `super_admin`/`admin`），localStorage 中的 role 被污染时统一登出回登录页；数据层越权仍以后端装饰器为最终防线。
+- 登出会调用后端 `POST /common/logout` 服务端撤销令牌后再清理本地；服务端不可达时仍保证本地登出成功（fail-open）。
 - 所有接口请求经 `src/api/index.js` 统一封装，请勿绕过拦截器直接发起请求。
 - 生产部署请勿将管理端代理直接指向公网未鉴权后端；`vite.config.js` 中的 `localhost:5000` 代理仅用于本地开发。
 

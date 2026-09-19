@@ -120,6 +120,8 @@ export function gaugeOption(value) {
         startAngle: 180,
         endAngle: 0,
         min: 0,
+        // 取值来自 /admin/matching/stats 的 matchRate.overall（后端按 matched/total*100 计算，
+        // 删除物品时同步清理匹配记录），必然 ≤100，max 固定 100 即可
         max: 100,
         splitNumber: 10,
         axisLine: {

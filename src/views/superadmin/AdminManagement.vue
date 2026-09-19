@@ -65,7 +65,7 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitForm">确认</el-button>
+          <el-button type="primary" @click="submitForm" :loading="submitting">确认</el-button>
         </div>
       </template>
     </el-dialog>
@@ -110,6 +110,7 @@ const dialogType = ref('add'); // 'add' 或 'edit'
 const deleteDialogVisible = ref(false);
 const currentAdmin = ref(null);
 const formRef = ref(null);
+const submitting = ref(false); // 提交进行中：按钮 loading 并防重复提交
 
 const sortOptions = [
   { label: '按ID排序', value: 'id' },
@@ -222,20 +223,25 @@ const submitForm = async () => {
   if (!formRef.value) return;
   await formRef.value.validate(async (valid) => {
     if (valid) {
-      const formData = { ...adminForm };
-      if (!formData.avatar_url) formData.avatar_url = '';
+      submitting.value = true;
+      try {
+        const formData = { ...adminForm };
+        if (!formData.avatar_url) formData.avatar_url = '';
 
-      let result;
-      if (dialogType.value === 'add') {
-        result = await adminStore.addAdmin(formData);
-      } else {
-        const { id, password, ...updateData } = formData;
-        result = await adminStore.updateUser(id, updateData);
-      }
-      // 失败时保持弹窗打开，让用户修正后重试（store 内已有错误提示）
-      if (result !== false) {
-        dialogVisible.value = false;
-        await fetchAdmins(); // store 不再内置刷新，本页刷新自己展示的管理员列表
+        let result;
+        if (dialogType.value === 'add') {
+          result = await adminStore.addAdmin(formData);
+        } else {
+          const { id, password, ...updateData } = formData;
+          result = await adminStore.updateUser(id, updateData);
+        }
+        // 失败时保持弹窗打开，让用户修正后重试（store 内已有错误提示）
+        if (result !== false) {
+          dialogVisible.value = false;
+          await fetchAdmins(); // store 不再内置刷新，本页刷新自己展示的管理员列表
+        }
+      } finally {
+        submitting.value = false;
       }
     } else {
       ElMessage.error('请正确填写表单信息');

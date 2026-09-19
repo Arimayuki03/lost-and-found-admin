@@ -24,8 +24,9 @@ export const useAdminStore = defineStore('superAdminManagement', {
           sort_by: sortBy,
           sort_order: sortOrder
         });
-        this.users = response.items;
-        this.usersTotal = response.total;
+        // 后端 /sadmin/users 返回扁平 { items, total }；空值防护避免异常响应触发 TypeError
+        this.users = response?.items || [];
+        this.usersTotal = response?.total || 0;
         this.currentPage = page;
         this.pageSize = size;
         return response;
@@ -41,8 +42,9 @@ export const useAdminStore = defineStore('superAdminManagement', {
       this.loading = true;
       try {
         const response = await getAdmins(page, size, sortBy, sortOrder);
-        this.admins = response.items;
-        this.adminsTotal = response.total;
+        // 后端 /sadmin/admins 返回扁平 { items, total }；空值防护避免异常响应触发 TypeError
+        this.admins = response?.items || [];
+        this.adminsTotal = response?.total || 0;
         this.currentPage = page;
         this.pageSize = size;
         return response;

@@ -172,12 +172,12 @@ const timeField = computed(() => (isLost.value ? 'lost_time' : 'found_time'));
 
 const CATEGORIES = ['电子产品', '证件', '钱包', '钥匙', '书籍', '衣物', '饰品', '其他'];
 
-// 接口按类型选择（found 侧后端接收 params 对象，lost 侧为位置参数）
+// 接口按类型选择（found 侧后端接收 params 对象，lost 侧为位置参数；keyword 均为搜索关键词）
 const api = computed(() =>
   isLost.value
     ? {
         list: (page, size, query, by, order) => getLostItems(page, size, query, by, order),
-        unreviewed: (page, size, by, order) => getUnreviewedLostItems(page, size, by, order),
+        unreviewed: (page, size, keyword, by, order) => getUnreviewedLostItems(page, size, keyword, by, order),
         search: (params, page, size) => searchLostItems(params, page, size),
         review: reviewLostItem,
         cancel: cancelLostItemReview,
@@ -185,7 +185,7 @@ const api = computed(() =>
       }
     : {
         list: (page, size, query, by, order) => getFoundItems(page, size, { sort_by: by, sort_order: order, query }),
-        unreviewed: (page, size, by, order) => getUnreviewedFoundItems(page, size, { sort_by: by, sort_order: order }),
+        unreviewed: (page, size, keyword, by, order) => getUnreviewedFoundItems(page, size, { keyword, sort_by: by, sort_order: order }),
         search: (params, page, size) => searchFoundItems(params, page, size),
         review: reviewFoundItem,
         cancel: cancelFoundItemReview,
@@ -353,9 +353,10 @@ const fetchItems = async () => {
   }
   loading.value = true;
   try {
+    // 未审核标签页同样透传搜索框关键词（后端 unreviewed 接口支持 keyword 模糊匹配）
     const response =
       viewMode.value === 'unreviewed'
-        ? await api.value.unreviewed(currentPage.value, pageSize.value, sortBy.value, sortOrder.value)
+        ? await api.value.unreviewed(currentPage.value, pageSize.value, searchQuery.value, sortBy.value, sortOrder.value)
         : await api.value.list(currentPage.value, pageSize.value, searchQuery.value, sortBy.value, sortOrder.value);
     applyResponse(response);
   } catch (err) {
