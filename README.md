@@ -25,9 +25,9 @@
 
 | 仓库 | 说明 | 默认端口 |
 | --- | --- | --- |
-| [lost_and_found](https://github.com/Arimayuki03/lost_and_found) | Flask 后端（API、Socket.IO、匹配算法、邮件通知） | 5000 |
-| [lost_and_found_user](https://github.com/Arimayuki03/lost_and_found_user) | 用户端前端（uni-app Vue3，H5 / 微信小程序 / App） | 5173（CLI H5） |
-| [lost_and_found_admin](https://github.com/Arimayuki03/lost_and_found_admin) | **本项目**：管理后台前端（Vue 3 + Element Plus） | 8001 |
+| [lost-and-found](https://github.com/Arimayuki03/lost_and_found) | Flask 后端（API、Socket.IO、匹配算法、邮件通知） | 5000 |
+| [lost-and-found-user](https://github.com/Arimayuki03/lost_and_found_user) | 用户端前端（uni-app Vue3，H5 / 微信小程序 / App） | 5173（CLI H5） |
+| [lost-and-found-admin](https://github.com/Arimayuki03/lost_and_found_admin) | **本项目**：管理后台前端（Vue 3 + Element Plus） | 8001 |
 
 ## ✨ 功能特性
 
@@ -66,14 +66,14 @@
 ### 环境要求
 
 - Node.js 18+
-- 后端服务运行在 `http://localhost:5000`（见 [lost_and_found](https://github.com/Arimayuki03/lost_and_found) 后端项目）
+- 后端服务运行在 `http://localhost:5000`（见 [lost-and-found](https://github.com/Arimayuki03/lost_and_found) 后端项目）
 
 ### 安装与启动
 
 ```bash
 # 克隆仓库
 git clone https://github.com/Arimayuki03/lost_and_found_admin.git
-cd lost_and_found_admin
+cd lost-and-found-admin
 
 # 安装依赖
 npm install
