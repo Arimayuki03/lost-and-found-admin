@@ -11,7 +11,7 @@
 [![Element Plus](https://img.shields.io/badge/Element%20Plus-2.4-409EFF?logo=element&logoColor=white)](https://element-plus.org/)
 [![ECharts](https://img.shields.io/badge/ECharts-5.6-AA344D?logo=apacheecharts&logoColor=white)](https://echarts.apache.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/Arimayuki03/lost_and_found_admin?label=Release)](../../releases)
+[![Release](https://img.shields.io/github/v/release/Arimayuki03/lost-and-found-admin?label=Release)](../../releases)
 
 </div>
 
@@ -25,9 +25,9 @@
 
 | 仓库 | 说明 | 默认端口 |
 | --- | --- | --- |
-| [lost-and-found](https://github.com/Arimayuki03/lost_and_found) | Flask 后端（API、Socket.IO、匹配算法、邮件通知） | 5000 |
-| [lost-and-found-user](https://github.com/Arimayuki03/lost_and_found_user) | 用户端前端（uni-app Vue3，H5 / 微信小程序 / App） | 5173（CLI H5） |
-| [lost-and-found-admin](https://github.com/Arimayuki03/lost_and_found_admin) | **本项目**：管理后台前端（Vue 3 + Element Plus） | 8001 |
+| [lost-and-found](https://github.com/Arimayuki03/lost-and-found) | Flask 后端（API、Socket.IO、匹配算法、邮件通知） | 5000 |
+| [lost-and-found-user](https://github.com/Arimayuki03/lost-and-found-user) | 用户端前端（uni-app Vue3，H5 / 微信小程序 / App） | 5173（CLI H5） |
+| [lost-and-found-admin](https://github.com/Arimayuki03/lost-and-found-admin) | **本项目**：管理后台前端（Vue 3 + Element Plus） | 8001 |
 
 ## ✨ 功能特性
 
@@ -66,13 +66,13 @@
 ### 环境要求
 
 - Node.js 18+
-- 后端服务运行在 `http://localhost:5000`（见 [lost-and-found](https://github.com/Arimayuki03/lost_and_found) 后端项目）
+- 后端服务运行在 `http://localhost:5000`（见 [lost-and-found](https://github.com/Arimayuki03/lost-and-found) 后端项目）
 
 ### 安装与启动
 
 ```bash
 # 克隆仓库
-git clone https://github.com/Arimayuki03/lost_and_found_admin.git
+git clone https://github.com/Arimayuki03/lost-and-found-admin.git
 cd lost-and-found-admin
 
 # 安装依赖
@@ -90,7 +90,7 @@ npm run preview
 
 启动后访问 <http://localhost:8001>。
 
-> 💡 本管理端依赖后端接口，请先启动 `lost_and_found` 后端（端口 5000）再登录使用。
+> 💡 本管理端依赖后端接口，请先启动 [lost-and-found](https://github.com/Arimayuki03/lost-and-found) 后端（端口 5000）再登录使用。
 
 ### 代理配置
 
