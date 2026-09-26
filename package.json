@@ -1,6 +1,6 @@
 {
   "name": "lost-and-found-admin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "校园失物招领平台管理后台（Vue 3 + Element Plus）",
   "license": "MIT",
   "private": true,

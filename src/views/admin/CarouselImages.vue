@@ -56,7 +56,7 @@
         <el-form-item label="图片上传">
           <el-upload
             class="upload-demo"
-            action="/api/common/images/upload"
+            :action="UPLOAD_URL"
             :headers="uploadHeaders"
             :show-file-list="false"
             :on-success="handleUploadSuccess"
@@ -95,6 +95,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { getCarouselImages, addCarouselImage, updateCarouselImage, deleteCarouselImage } from '@/api/admin';
+import { UPLOAD_URL } from '@/api';
 import { formatDate } from '@/utils/format';
 import { useUserStore } from '@/store/modules/user';
 import LfPageHeader from '@/components/LfPageHeader.vue';
@@ -284,7 +285,8 @@ const handleUploadSuccess = (response) => {
 };
 
 const handleUploadError = () => {
-  ElMessage.error('图片上传失败');
+  // el-upload 直传不经过 axios 拦截器，登录态失效（401）时只会走到这里，提示中补充引导
+  ElMessage.error('图片上传失败，请确认登录状态后重试');
 };
 
 const beforeUpload = (file) => {

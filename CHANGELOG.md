@@ -3,7 +3,25 @@
 本项目的所有重要变更都会记录在本文件中。
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
-版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+版本号遵循 [语义化版本](https://semver.org/lang-zh-CN/)。
+
+## [1.0.1] - 2026-09-26
+
+2026-09-26 全量代码审查后集中修复。
+
+### Fixed（修复）
+
+- 添加管理员密码校验仍为 min:6，与后端 8-64 规则不一致（CHANGELOG 声称已修但代码未改，6-7 位密码前端通过、后端必拒且原因被吞）；规则对齐 8-64（`src/views/superadmin/AdminManagement.vue`）。
+- 超管 store 三个写操作（addAdmin/updateUser/deleteUser）catch 统一固定文案，后端语义化错误（"学号已存在"、"不能删除管理员账号"等）全部被吞，操作失败完全不可诊断；改为透传 `error?.response?.data?.error`（`src/store/modules/admin.js`）。
+- 管理员管理页每行"删除"按钮是死按钮——后端 `DELETE /sadmin/users` 对 is_admin 用户一律 403，点击 100% 失败。移除死按钮，管理员停用走编辑降级（有末位管理员保护）；超管用户管理列表对管理员行同样隐藏删除按钮（`src/views/superadmin/AdminManagement.vue`、`src/views/superadmin/UserManagement.vue`）。
+- 应用高级筛选时搜索框关键词被静默丢弃（sift 请求不含 keyword 而后端支持），筛选结果是"该分类全部物品"而非"该分类下匹配关键词的物品"；fetchFilteredItems 补透传 keyword（`src/views/admin/ItemsManagement.vue`）。
+- el-upload 三处硬编码 `action="/api/common/images/upload"`，绕过 `VITE_API_BASE_URL` 配置（部署非 /api 前缀时全部 404）且不走 axios 拦截器（token 过期上传直接 401 无自愈）；改为基于 `VITE_API_BASE_URL` 的共享常量（`src/views/admin/CarouselImages.vue`、`src/views/superadmin/AdminManagement.vue`、`src/views/superadmin/UserManagement.vue`）。
+- 学号/邮箱长度校验与后端限制不一致（student_id ≤ 12、email ≤ 100），超长输入前端通过、后端必拒；补长度上限（`src/views/superadmin/UserManagement.vue`、`src/views/admin/UserManagement.vue`）。
+
+### Known Issues（暂不修复，已记录）
+
+- 多标签页登出不同步：无 storage 事件/BroadcastChannel 广播，其他标签页在下次请求 401 前仍呈现已登录 UI（服务端已撤销令牌，仅是显示层误导窗口）。
+- 用户ID筛选输入科学计数法（如 1e5）可触发后端 500（number input 放行 + 后端 int() 未捕获）；可在浏览器实测后补 pattern 校验。
 
 ## [1.0.0] - 2026-09-21
 

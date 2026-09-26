@@ -68,7 +68,8 @@ export const useAdminStore = defineStore('superAdminManagement', {
         await this.fetchAdmins(this.currentPage, this.pageSize);
         return response;
       } catch (error) {
-        ElMessage.error('添加管理员失败');
+        // 透出后端语义化错误（如"学号已存在"），无响应体时回退默认文案
+        ElMessage.error(error?.response?.data?.error || '添加管理员失败');
         return false;
       }
     },
@@ -86,7 +87,8 @@ export const useAdminStore = defineStore('superAdminManagement', {
         // 避免两个列表的 fetch 相互覆盖分页状态（usersTotal/adminsTotal 已拆分）
         return response;
       } catch (error) {
-        ElMessage.error('更新用户信息失败');
+        // 透出后端语义化错误（如"学号已存在"），无响应体时回退默认文案
+        ElMessage.error(error?.response?.data?.error || '更新用户信息失败');
         return false;
       }
     },
@@ -99,7 +101,8 @@ export const useAdminStore = defineStore('superAdminManagement', {
         // 避免两个列表的 fetch 相互覆盖分页状态（usersTotal/adminsTotal 已拆分）
         return response;
       } catch (error) {
-        ElMessage.error('删除用户失败');
+        // 透出后端语义化错误，无响应体时回退默认文案
+        ElMessage.error(error?.response?.data?.error || '删除用户失败');
         return false;
       }
     },

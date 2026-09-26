@@ -308,6 +308,10 @@ const fetchFilteredItems = async () => {
     // 透传排序（后端 search 端点白名单已覆盖全部可选字段）
     params.sort_by = sortBy.value;
     params.sort_order = sortOrder.value;
+    // 后端 /sift 支持 keyword 跨字段模糊匹配：搜索框有关键词时透传，避免"应用筛选"后关键词静默失效
+    if (searchQuery.value.trim()) {
+      params.keyword = searchQuery.value.trim();
+    }
 
     const response = await api.value.search(params, currentPage.value, pageSize.value);
     applyResponse(response);

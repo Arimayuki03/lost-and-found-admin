@@ -100,4 +100,8 @@ service.interceptors.response.use(
   }
 );
 
+// el-upload 的 action 不走 axios 实例，必须显式拼接 API 基地址；
+// 写死 '/api' 会在部署配置非 /api 前缀（独立域名/网关路径）时全部 404
+export const UPLOAD_URL = `${import.meta.env.VITE_API_BASE_URL || '/api'}/common/images/upload`;
+
 export default service;

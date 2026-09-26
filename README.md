@@ -12,6 +12,7 @@
 [![ECharts](https://img.shields.io/badge/ECharts-5.6-AA344D?logo=apacheecharts&logoColor=white)](https://echarts.apache.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Arimayuki03/lost-and-found-admin?label=Release)](../../releases)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue)](CHANGELOG.md)
 
 </div>
 
@@ -20,6 +21,8 @@
 ## 📖 简介
 
 面向管理员与超级管理员的管理后台前端，提供失物/拾物审核、公告与轮播图管理、用户与管理员账户管理、数据统计可视化等能力。
+
+> **v1.0.1**：全量代码审查后集中修复——添加管理员密码校验对齐后端 8-64 规则、超管 store 透传后端语义化错误、移除对管理员 100% 失败的死删除按钮、高级筛选不再静默丢弃搜索关键词、el-upload 上传地址改走 `VITE_API_BASE_URL` 共享常量、学号/邮箱长度校验与后端对齐。详见 [CHANGELOG](CHANGELOG.md)。
 
 ## 📦 相关仓库
 

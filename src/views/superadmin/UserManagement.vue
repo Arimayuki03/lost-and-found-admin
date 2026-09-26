@@ -32,7 +32,8 @@
       <template #actions="{ row }">
         <div class="operation-buttons">
           <el-button size="small" type="primary" @click="handleEdit(row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
+          <!-- 后端对 is_admin 用户的删除请求一律 403，管理员行不渲染删除按钮 -->
+          <el-button v-if="!row.is_admin" size="small" type="danger" @click="handleDelete(row)">删除</el-button>
         </div>
       </template>
     </LfTable>
@@ -43,10 +44,11 @@
         <el-form-item label="头像">
           <el-upload
             class="avatar-uploader"
-            action="/api/common/images/upload"
+            :action="UPLOAD_URL"
             :headers="uploadHeaders"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
+            :on-error="handleAvatarUploadError"
             :before-upload="beforeAvatarUpload"
           >
             <img v-if="userForm.avatar_url" :src="userForm.avatar_url" class="avatar" />
@@ -96,6 +98,7 @@ import { useAdminStore } from '@/store/modules/admin';
 import { useUserStore } from '@/store/modules/user';
 import { ElMessage } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
+import { UPLOAD_URL } from '@/api';
 import LfPageHeader from '@/components/LfPageHeader.vue';
 import LfFilterPanel from '@/components/LfFilterPanel.vue';
 import LfTable from '@/components/LfTable.vue';
@@ -195,6 +198,11 @@ const handleSearch = () => {
 const handleAvatarSuccess = (response) => {
   userForm.avatar_url = response.file_url;
   ElMessage.success('头像上传成功');
+};
+
+// el-upload 直传不经过 axios 拦截器，登录态失效（401）时只会走到这里，提示中补充引导
+const handleAvatarUploadError = () => {
+  ElMessage.error('图片上传失败，请确认登录状态后重试');
 };
 
 const beforeAvatarUpload = (file) => {
